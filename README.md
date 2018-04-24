@@ -17,30 +17,19 @@ Crear un ambientes kubernetes corriendo con Minikube.
 
 #### Objetivos
 
-1. Crear volumenes persistentes 
-2. Crear un "secret" para proteger datos sensibles
-3. Crear y deployar una base de datos Mysql
-4. Crear y deployar Wordpress
-5. Testear la aplicacion
-6. Testear escalabilidad horizontal
-7. Configurar Autoscaling Webserver
-8. Testear Alta Disponibilidad
+1. Crear un "secret" para proteger datos sensibles
+2. Crear y deployar una base de datos Mysql
+3. Crear y deployar Wordpress
+4. Testear la aplicacion
+5. Testear escalabilidad horizontal
+6. Configurar Autoscaling Webserver
+7. Testear Alta Disponibilidad
 
 ------
 
 
 
-#### 1. Crear volumenes persistentes 
-
-Para guardar la informacion y que persista al ciclo de vida de un pod crearemos volumenes persistentes:
-
-```
-$ kubectl create -f volumes.yml
-```
-
-
-
-#### 2. Crear un "secret" para proteger datos sensibles
+#### 1. Crear un "secret" para proteger datos sensibles
 
 ```
 $ kubectl create secret generic mysql-pass --from-literal=password=XXXXXXXX
@@ -48,7 +37,7 @@ $ kubectl create secret generic mysql-pass --from-literal=password=XXXXXXXX
 
 
 
-#### 3. Crear y deployar una base de datos MySQL 
+#### 2. Crear y deployar una base de datos MySQL 
 
 ```
 $ kubectl create -f mysql.yml
@@ -56,7 +45,7 @@ $ kubectl create -f mysql.yml
 
 
 
-#### 4. Crear y deployar Wordpress
+#### 3. Crear y deployar Wordpress
 
 ```
 $ kubectl create -f wordpress.yml
@@ -64,7 +53,7 @@ $ kubectl create -f wordpress.yml
 
 
 
-#### 5. Testear la aplicacion
+#### 4. Testear la aplicacion
 
 Antes de seguir podemos verificar los pods, los deployments y los servicios
 
@@ -108,7 +97,7 @@ Backend: http://$urlminikube/wp-admin
 
 
 
-#### 6. Testear escalabilidad horizontal 
+#### 5. Testear escalabilidad horizontal 
 
 Podremos aumentar la cantidad de replicas de forma manual para repartirar la carga.
 
@@ -127,7 +116,7 @@ wordpress-mysql   2         2         2            1           14m
 
 
 
-#### 7. Configurar autoscaling
+#### 6. Configurar autoscaling
 
 Esta configurado el autoscaling (Horizontal Pod Autoscaler - HPA) para que minimo haya 2 replicas y maximo 10, y crezca cuando llegue a un %20 de consumo de CPU (valor bajo para testear mas rapidamente), tambien se puede verificar el estado actual del HPA
 
@@ -152,7 +141,7 @@ $ ab -n 10000 -c 10 http://ip:port/
 
 
 
-#### 8. Testear Alta Disponibilidad
+#### 7. Testear Alta Disponibilidad
 
 Kubernetes por default brinda alta disponibilidad, esto lo logra implementando componentes de auto regeneracion. Esto se puede comprobar eliminando uno de los pods.
 
