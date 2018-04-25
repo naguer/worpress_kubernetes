@@ -24,6 +24,7 @@ Crear un ambientes kubernetes corriendo con Minikube.
 5. Testear escalabilidad horizontal
 6. Configurar Autoscaling Webserver
 7. Testear Alta Disponibilidad
+8. Extra: Levantar entorno en Google Compute Engine
 
 ------
 
@@ -156,3 +157,66 @@ NAME                              READY     STATUS              RESTARTS   AGE
 wordpress-7467f54f7d-5gjxb        0/1       Terminating         0          17m
 wordpress-7467f54f7d-p7qp2        0/1       ContainerCreating   0          1s
 ```
+
+
+
+####  8. Extra: Levantar entorno en Google Compute Engine
+
+Para levantar el entorno en Google Compute Engine hay que tener una cuenta Google y solicitar el free tier (u$s 300 por 12 meses) en https://cloud.google.com/free/
+
+Luego hay que instalar el SDK de Gcloud en el OS https://cloud.google.com/sdk/downloads
+
+Una vez que ya esta instalado Gcloud y solicitado el freetier se puede comenzar a levantar el entorno.
+Nos pedira que ingresemos la direccion de mail que tiene asociado el Free Tier, y luego en el browser que validemos el acceso.
+
+```
+gcloud init
+```
+
+Creamos el nombre del proyecto que vamos a utilizar y configuramos los valores por defecto
+
+```
+$ gcloud projects create [PROJECT_ID]
+$ gcloud config set project [PROJECT_ID]
+$ gcloud config set compute/zone us-central1-c
+$ gcloud config set compute/region us-central1
+$ gcloud config list 
+```
+
+Configuramos variables de entorno (Linux)
+
+```
+$ export CLUSTER_NAME="wordpress"
+$ export ZONE="us-central1-c"
+$ export REGION="us-central1"
+```
+
+Creamos el cluster de kubernetes, esto puede tardar varios minutos.
+
+```
+$ gcloud container clusters create wordpress-cluster --num-nodes 3
+```
+
+Ahora configuramos el cluster como el default.
+
+```
+$ gcloud config set container/cluster wordpress-cluster
+```
+
+Por ultimo, para levantar el entorno vamos al paso 1) y seguimos los mismos pasos que hariamos en Minikube
+La unica diferencia sera que para ver la ip publica que tendremos que acceder para ver nuestra aplicacion, sera la ip que esta definida como EXTERNAL-IP, aparecera asignada cuando el servicio este disponible.
+
+```
+kubectl get svc wordpress
+NAME        TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
+wordpress   LoadBalancer   10.51.245.83   35.193.199.130   80:32017/TCP   2m
+```
+
+Si queremos limpiar todo rapidamente se puede hacer de la siguiente forma
+
+```
+kubectl delete deployment,service,pvc --all
+kubectl delete secret mysql-pass
+gcloud container clusters delete wordpress-cluster
+```
+Es recomendable limpiar todo al terminar, ya que si sigue levantado seguira facturando.
