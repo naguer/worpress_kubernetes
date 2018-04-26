@@ -4,7 +4,14 @@ Para poder configurar instancias mysql que tengan alta disponibilidad hay que us
 
 Esta prueba sera levantar un nodo de MySQL master y dos slaves.
 
-#### Objetivos
+### Recomendacion
+
+Levantar Minikube con 2 cpus y 2 GB de memoria
+```
+$ minikube --cpus 2 --memory 2048 start
+```
+
+### Objetivos
 
 1. Crear y deployar una base de datos MySQL Master con dos Slave
 2. Testear la replicacion 
@@ -34,6 +41,23 @@ Por ultimo creamos el StatefulSet, que sera el encargado de iniciar los pods y t
 $ kubectl apply -f mysql-statefulset.yml
 ```
 
+Verificamos que todo levanto correctamente
+
+```
+$ kubectl get statefulset,svc,pods
+NAME      DESIRED   CURRENT   AGE
+mysql     3         3         1m
+
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP    48m
+mysql        ClusterIP   None           <none>        3306/TCP   8m
+mysql-read   ClusterIP   10.110.76.40   <none>        3306/TCP   8m
+
+NAME      READY     STATUS    RESTARTS   AGE
+mysql-0   2/2       Running   0          1m
+mysql-1   2/2       Running   0          1m
+mysql-2   2/2       Running   0          1m
+```
 
 
 ##### 2. Testear la replicacion 
