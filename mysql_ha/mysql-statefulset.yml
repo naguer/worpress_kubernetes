@@ -1,19 +1,17 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql
 spec:
   selector:
     matchLabels:
-#      app: mysql
-      app: wordpress
+      app: mysql
   serviceName: mysql
   replicas: 3
   template:
     metadata:
       labels:
-#        app: mysql
-        app: wordpress
+        app: mysql
     spec:
       initContainers:
       - name: init-mysql
@@ -80,8 +78,8 @@ spec:
           mountPath: /etc/mysql/conf.d
         resources:
           requests:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 500m
+            memory: 500Mi
         livenessProbe:
           exec:
             command: ["mysqladmin", "ping"]
