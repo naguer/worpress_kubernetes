@@ -30,6 +30,21 @@ Crear un ambientes kubernetes corriendo con Minikube.
 
 
 
+Antes que nada para poder utilizar el HPA tendremos que instalar un metric server (en GCE no hace falta)
+los archivos ya estan en este repo, pero se pueden descargar de https://github.com/kubernetes-incubator/metrics-server.git
+
+```
+$ kubectl create -f metrics-server/deploy/1.8+/
+```
+
+Podemos confirmar que el server este funcionando 
+
+```
+$ kubectl get pods -n kube-system | grep metrics-server
+```
+
+
+
 #### 1. Crear un "secret" para proteger datos sensibles
 
 ```
@@ -119,13 +134,13 @@ wordpress-mysql   2         2         2            1           14m
 
 #### 6. Configurar autoscaling
 
-Esta configurado el autoscaling (Horizontal Pod Autoscaler - HPA) para que minimo haya 2 replicas y maximo 10, y crezca cuando llegue a un %20 de consumo de CPU (valor bajo para testear mas rapidamente), tambien se puede verificar el estado actual del HPA
+Esta configurado el autoscaling (Horizontal Pod Autoscaler - HPA) para que minimo haya 2 replicas y maximo 10, y crezca cuando llegue a un %5 de consumo de CPU (valor bajo para testear mas rapidamente), tambien se puede verificar el estado actual del HPA
 
 ```
 $ kubectl create -f wordpress-hpa.yml
 $ kubectl get hpa
 NAME        REFERENCE              TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
-wordpress   Deployment/wordpress   <unknown>/20%   2         10        4          1m
+wordpress   Deployment/wordpress   0/5%   2         10        4          1m
 ```
 
 ###### Por un bug en Minikube desde la version 1.8 de Kubernetes no trae las metricas de hardware y por lo tanto no puede utilizar HPA, funciona correctamente en un entorno corriendo en GCE. 
@@ -138,6 +153,25 @@ Corrrera 100000 request con una concurrencia de 10 (necesita el paquete apache2-
 
 ```
 $ ab -n 10000 -c 10 http://ip:port/
+```
+
+
+Otra forma de generar carga es desde adentro del cluster, para esto levantamos un container con una imagen busybox
+
+```
+kubectl run --generator=run-pod/v1 -i --tty load-generator --image=busybox /bin/sh
+```
+
+Cuando nos devuelva el prompt empezamos a generar carga apuntando al svc
+
+```
+while true; do wget -q -O- http://wordpres; done
+```
+
+En otra consola revisar la cantidad de pods, para ver como iran creciendo
+
+```
+kubectl get pods -w 
 ```
 
 
